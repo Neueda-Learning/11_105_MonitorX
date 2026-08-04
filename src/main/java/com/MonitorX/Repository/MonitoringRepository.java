@@ -67,4 +67,34 @@ public class MonitoringRepository {
         transactions.remove(id);
         alerts.entrySet().removeIf(entry -> entry.getValue().transactionId() == id);
     }
+    
+    public FraudAlert saveAlert(FraudAlert alert) {
+        int id = alertIds.getAndIncrement();
+        FraudAlert saved = new FraudAlert(id, alert.transactionId(), alert.customerName(), alert.severity(),
+                alert.status(), alert.riskScore(), alert.reasons(), alert.createdAt());
+        alerts.put(id, saved);
+        return saved;
+    }
+
+    public List<FraudAlert> findAllAlerts() {
+        return alerts.values().stream()
+                .sorted(Comparator.comparing(FraudAlert::createdAt).reversed())
+                .toList();
+    }
+
+    public Optional<FraudAlert> findAlert(int id) {
+        return Optional.ofNullable(alerts.get(id));
+    }
+
+    public FraudAlert updateAlert(FraudAlert alert) {
+        alerts.put(alert.id(), alert);
+        return alert;
+    }
+
+    public void clearActivity() {
+        transactions.clear();
+        alerts.clear();
+        transactionIds.set(1);
+        alertIds.set(1);
+    }
 }
