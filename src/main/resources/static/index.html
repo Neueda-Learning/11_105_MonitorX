@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MonitorX fraud and transaction monitoring dashboard">
+    <title>MonitorX | Fraud Monitoring</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="#overview" aria-label="MonitorX home">
+        <span class="brand-mark">MX</span>
+        <span><strong>MonitorX</strong><small>Transaction intelligence</small></span>
+    </a>
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#transactions">Transactions</a>
+        <a href="#alerts">Alerts</a>
+    </nav>
+    <label class="risk-filter-control">
+        <span>Alert risk</span>
+        <select id="riskFilter" aria-label="Filter alerts by risk rating">
+            <option value="ALL">All alerts</option>
+            <option value="LOW">Low risk</option>
+            <option value="MEDIUM">Medium risk</option>
+            <option value="HIGH">High risk</option>
+        </select>
+    </label>
+    <button class="button secondary" id="seedButton">Reset 500 transactions</button>
+</header>
+
+<main>
+    <section class="hero" id="overview">
+        <div>
+            <span class="eyebrow">LIVE RISK OVERVIEW</span>
+            <h1>See suspicious payments before they become losses.</h1>
+            <p>MonitorX checks transaction amount, time, and location, then creates a reviewable alert when a risk rule is triggered.</p>
+        </div>
+        <div class="system-status"><span></span> Monitoring active</div>
+    </section>
+
+    <section class="metrics" aria-label="Dashboard summary">
+        <article><span>Total transactions</span><strong id="totalTransactions">0</strong></article>
+        <article><span>Flagged transactions</span><strong id="flaggedTransactions">0</strong></article>
+        <article><span>Open alerts</span><strong id="openAlerts">0</strong></article>
+        <article><span>Processed volume</span><strong id="totalVolume">$0.00</strong></article>
+    </section>
+
+    <section class="workspace">
+        <article class="panel transaction-panel" id="transactions">
+            <div class="panel-heading">
+                <div><span class="eyebrow">TRANSACTION FEED</span><h2>Recent activity</h2></div>
+                <button class="button" id="newTransactionButton">+ Add transaction</button>
+            </div>
+            <div class="table-wrap transaction-table-wrap">
+                <table>
+                    <thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Country</th><th>Time</th><th>Risk</th><th>Status</th></tr></thead>
+                    <tbody id="transactionRows"></tbody>
+                </table>
+                <div class="empty" id="transactionEmpty">No transactions yet.</div>
+            </div>
+        </article>
+
+        <article class="panel alerts-panel" id="alerts">
+            <div class="panel-heading">
+                <div><span class="eyebrow">CASE QUEUE</span><h2>Fraud alerts</h2></div>
+            </div>
+            <div class="alert-list" id="alertList"></div>
+            <div class="empty" id="alertEmpty">No fraud alerts. Everything looks clear.</div>
+        </article>
+    </section>
+
+    <section class="panel rules">
+        <div class="panel-heading"><div><span class="eyebrow">ACTIVE RULES</span><h2>Risk checks</h2></div></div>
+        <div class="rule-grid">
+            <article><span class="rule-icon">$</span><div><strong>High amount</strong><p>Adds 40 points above 10,000.</p></div></article>
+            <article><span class="rule-icon">T</span><div><strong>Unusual hours</strong><p>Adds 20 points before 5 AM.</p></div></article>
+            <article><span class="rule-icon">L</span><div><strong>Location mismatch</strong><p>Adds 30 points outside the registered country.</p></div></article>
+            <article><span class="rule-icon">V</span><div><strong>Transaction velocity</strong><p>Adds 30 points when more than 5 transactions occur within 10 minutes.</p></div></article>
+        </div>
+    </section>
+</main>
+
+<dialog id="transactionDialog">
+    <form id="transactionForm">
+        <div class="dialog-heading"><div><span class="eyebrow">NEW PAYMENT</span><h2>Record transaction</h2></div><button type="button" class="icon-button" id="closeDialog" aria-label="Close">X</button></div>
+        <label>Customer<select id="customerId" required></select></label>
+        <div class="form-row">
+            <label>Amount<input id="amount" type="number" min="0.01" step="0.01" placeholder="12500.00" required></label>
+            <label>Country<input id="country" maxlength="60" placeholder="India" required></label>
+        </div>
+        <label>Date and time<input id="timestamp" type="datetime-local"></label>
+        <label>Description<input id="description" maxlength="160" placeholder="Vendor transfer"></label>
+        <p class="form-error" id="formError" role="alert"></p>
+        <div class="dialog-actions"><button type="button" class="button secondary" id="cancelDialog">Cancel</button><button class="button" type="submit">Check transaction</button></div>
+    </form>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>
