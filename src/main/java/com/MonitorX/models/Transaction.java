@@ -9,6 +9,7 @@ public record Transaction(
         int customerId,
         String customerName,
         BigDecimal amount,
+        String payeeId,
         String transactionCountry,
         LocalDateTime timestamp,
         String description,

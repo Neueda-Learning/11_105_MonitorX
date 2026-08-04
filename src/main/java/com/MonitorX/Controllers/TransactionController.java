@@ -35,5 +35,15 @@ public class TransactionController {
         return service.getTransaction(id);
     }
 
-    
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Transaction create(@Valid @RequestBody TransactionRequest request) {
+        return service.processTransaction(request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable int id) {
+        service.deleteTransaction(id);
+    }
 }
