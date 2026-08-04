@@ -38,4 +38,23 @@ public class FraudDetectionService {
         return repository.findTransaction(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Transaction not found"));
     }
+    
+    public List<FraudAlert> getAlerts() {
+        return repository.findAllAlerts();
+    }
+
+    public FraudAlert updateAlertStatus(int id, String requestedStatus) {
+        FraudAlert current = repository.findAlert(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Alert not found"));
+        String next = requestedStatus == null ? "" : requestedStatus.trim().toUpperCase(Locale.ROOT);
+        if (!ALERT_STATUSES.contains(next)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid alert status");
+        }
+        if ((current.status().equals("RESOLVED") || current.status().equals("DISMISSED"))
+                && !current.status().equals(next)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Closed alerts cannot be reopened");
+        }
+        return repository.updateAlert(current.withStatus(next));
+    }
+
 }
