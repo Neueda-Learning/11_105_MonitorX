@@ -1,100 +1,84 @@
-package com.MonitorX.Repository;
+  package com.MonitorX.Repository;
 
 import com.MonitorX.models.Customer;
 import com.MonitorX.models.FraudAlert;
+import com.MonitorX.models.Transaction;
+import com.MonitorX.models.Rule;
+import com.MonitorX.models.AlertHistoryItem;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.util.Comparator;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import com.MonitorX.models.Transaction;
-
-
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 @Repository
 public class MonitoringRepository {
-    private final Map<Integer, Customer> customers = new ConcurrentHashMap<>();
-    private final Map<Integer, Transaction> transactions = new ConcurrentHashMap<>();
-    private final AtomicInteger transactionIds = new AtomicInteger(1);
+    private final JdbcTemplate jdbc;
 
-    private final Map<Integer, FraudAlert> alerts = new ConcurrentHashMap<>();
-    private final AtomicInteger alertIds = new AtomicInteger(1);
-
-    public MonitoringRepository() {
-        customers.put(1, new Customer(1, "Rahul Sharma", "ACC1001", "India"));
-        customers.put(2, new Customer(2, "Priya Verma", "ACC1002", "India"));
-        customers.put(3, new Customer(3, "John Smith", "ACC1003", "USA"));
-        customers.put(4, new Customer(4, "Amina Yusuf", "ACC1004", "UAE"));
+    public MonitoringRepository(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
     }
-
+// Customer Methods
     public List<Customer> findAllCustomers() {
-        return customers.values().stream().sorted(Comparator.comparingInt(Customer::id)).toList();
+        return jdbc.query("SELECT id, name, account_number, registered_country FROM customers ORDER BY id", this::mapCustomer);
     }
 
     public Optional<Customer> findCustomer(int id) {
-        return Optional.ofNullable(customers.get(id));
-    }
-    public Transaction saveTransaction(Transaction transaction) {
-        int id = transactionIds.getAndIncrement();
-        Transaction saved = new Transaction(id, transaction.customerId(), transaction.customerName(),
-                transaction.amount(), transaction.transactionCountry(), transaction.timestamp(),
-                transaction.description(), transaction.status(), transaction.riskScore(), transaction.reasons());
-        transactions.put(id, saved);
-        return saved;
+        List<Customer> results = jdbc.query("SELECT id, name, account_number, registered_country FROM customers WHERE id = ?", this::mapCustomer, id);
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
 
-    public List<Transaction> findAllTransactions() {
-        return transactions.values().stream()
-                .sorted(Comparator.comparing(Transaction::timestamp).reversed())
-                .toList();
+    public Customer saveCustomer(Customer customer) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbc.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    "INSERT INTO customers (name, account_number, registered_country) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            ps.setString(1, customer.name());
+            ps.setString(2, customer.accountNumber());
+            ps.setString(3, customer.registeredCountry());
+            return ps;
+        }, keyHolder);
+
+        Number key = keyHolder.getKey();
+        int id = key != null ? key.intValue() : 0;
+        return new Customer(id, customer.name(), customer.accountNumber(), customer.registeredCountry());
     }
 
-    public Optional<Transaction> findTransaction(int id) {
-        return Optional.ofNullable(transactions.get(id));
+    public Customer updateCustomer(Customer customer) {
+        jdbc.update(
+                "UPDATE customers SET name = ?, account_number = ?, registered_country = ? WHERE id = ?",
+                customer.name(),
+                customer.accountNumber(),
+                customer.registeredCountry(),
+                customer.id()
+        );
+        return customer;
     }
 
-    public void deleteTransaction(int id) {
-        transactions.remove(id);
-        alerts.entrySet().removeIf(entry -> entry.getValue().transactionId() == id);
-    }
-    
-    public FraudAlert saveAlert(FraudAlert alert) {
-        int id = alertIds.getAndIncrement();
-        FraudAlert saved = new FraudAlert(id, alert.transactionId(), alert.customerName(), alert.severity(),
-                alert.status(), alert.riskScore(), alert.reasons(), alert.createdAt());
-        alerts.put(id, saved);
-        return saved;
+    public void deleteCustomer(int id) {
+        jdbc.update("DELETE FROM customers WHERE id = ?", id);
     }
 
-    public List<FraudAlert> findAllAlerts() {
-        return alerts.values().stream()
-                .sorted(Comparator.comparing(FraudAlert::createdAt).reversed())
-                .toList();
-    }
-
-    public Optional<FraudAlert> findAlert(int id) {
-        return Optional.ofNullable(alerts.get(id));
-    }
-
-    public FraudAlert updateAlert(FraudAlert alert) {
-        alerts.put(alert.id(), alert);
-        return alert;
-    }
-
-    public void clearActivity() {
-        transactions.clear();
-        alerts.clear();
-        transactionIds.set(1);
-        alertIds.set(1);
+    // Operator Methods
+    public Optional<String> getOperatorPasswordHash(String username) {
+        List<String> results = jdbc.query(
+                "SELECT password_hash FROM operators WHERE username = ?",
+                (rs, rowNum) -> rs.getString("password_hash"),
+                username
+        );
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
 }
