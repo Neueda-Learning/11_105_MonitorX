@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class FraudDetectionService {
@@ -291,17 +292,157 @@ public class FraudDetectionService {
         return repository.findRecentActivity(100);
     }
 
-    public Map<String, Integer> seedDemo() {
-        repository.clearActivity();
-        List<TransactionRequest> samples = List.of(
-                new TransactionRequest(1, new BigDecimal("850.00"), "PAYEE-101", "India", LocalDateTime.now().minusHours(5), "Utility payment"),
-                new TransactionRequest(2, new BigDecimal("14500.00"), "PAYEE-202", "India", LocalDateTime.now().minusHours(3), "Vendor transfer"),
-                new TransactionRequest(3, new BigDecimal("2200.00"), "PAYEE-303", "Germany", LocalDateTime.now().minusHours(2), "Online purchase"),
-                new TransactionRequest(4, new BigDecimal("18750.00"), "PAYEE-404", "Singapore", LocalDateTime.now().withHour(2), "International transfer"),
-                new TransactionRequest(1, new BigDecimal("120.00"), "PAYEE-101", "India", LocalDateTime.now().minusMinutes(20), "Card payment")
-        );
+    public Map<String, Object> seedDemo(boolean force) {
+        int existingCount = repository.findAllTransactions().size();
+
+        if (!force && existingCount > 0) {
+            return Map.of(
+                "skipped", true,
+                "message", "Data already loaded (" + existingCount + " transactions). Use force=true to reload.",
+                "transactions", existingCount,
+                "alerts", repository.findAllAlerts().size()
+            );
+        }
+
+        // Clear everything including customers for a clean demo slate
+        repository.clearAllForDemo();
+
+        // Step 1: Generate and save random customers
+        List<Customer> savedCustomers = generateAndSaveCustomers();
+
+        // Step 2: Generate 1000 transactions across those customers
+        List<TransactionRequest> samples = generateBulkTransactions(savedCustomers, 1000);
         samples.forEach(this::processTransaction);
-        return Map.of("transactions", getTransactions().size(), "alerts", getAlerts().size());
+
+        return Map.of(
+            "skipped", false,
+            "customers", savedCustomers.size(),
+            "transactions", getTransactions().size(),
+            "alerts", getAlerts().size()
+        );
+    }
+
+    private List<Customer> generateAndSaveCustomers() {
+        // Realistic multi-national customer pool
+        String[][] pool = {
+            // { firstName, lastName, country }
+            {"Rahul",      "Sharma",      "India"},
+            {"Priya",      "Verma",       "India"},
+            {"Amit",       "Patel",       "India"},
+            {"Ananya",     "Singh",       "India"},
+            {"Vikram",     "Nair",        "India"},
+            {"Deepika",    "Reddy",       "India"},
+            {"Arjun",      "Mehta",       "India"},
+            {"Kavya",      "Iyer",        "India"},
+            {"Rohan",      "Joshi",       "India"},
+            {"Sneha",      "Gupta",       "India"},
+            {"John",       "Smith",       "USA"},
+            {"Emily",      "Johnson",     "USA"},
+            {"Michael",    "Williams",    "USA"},
+            {"Sarah",      "Brown",       "USA"},
+            {"James",      "Davis",       "USA"},
+            {"Ashley",     "Miller",      "USA"},
+            {"Robert",     "Wilson",      "USA"},
+            {"Jessica",    "Moore",       "USA"},
+            {"Ahmed",      "Al-Rashid",   "UAE"},
+            {"Fatima",     "Hassan",      "UAE"},
+            {"Khalid",     "Al-Mansoori", "UAE"},
+            {"Layla",      "Ibrahim",     "UAE"},
+            {"Hans",       "Mueller",     "Germany"},
+            {"Anna",       "Schmidt",     "Germany"},
+            {"Lukas",      "Fischer",     "Germany"},
+            {"Pierre",     "Dupont",      "France"},
+            {"Sophie",     "Martin",      "France"},
+            {"Oliver",     "Brown",       "UK"},
+            {"Charlotte",  "Taylor",      "UK"},
+            {"Yuki",       "Tanaka",      "Japan"},
+            {"Haruto",     "Sato",        "Japan"},
+            {"Wei",        "Zhang",       "China"},
+            {"Li",         "Wang",        "China"},
+            {"Carlos",     "Silva",       "Brazil"},
+            {"Isabella",   "Costa",       "Brazil"},
+            {"Liam",       "Anderson",    "Canada"},
+            {"Emma",       "Thomas",      "Canada"},
+            {"Aryan",      "Khan",        "Singapore"},
+            {"Mei",        "Lim",         "Singapore"},
+            {"Noah",       "Martinez",    "USA"},
+        };
+
+        List<Customer> saved = new ArrayList<>();
+        for (int i = 0; i < pool.length; i++) {
+            String name = pool[i][0] + " " + pool[i][1];
+            String accNum = String.format("ACC%06d", 1001 + i);
+            Customer c = repository.saveCustomer(new Customer(0, name, accNum, pool[i][2]));
+            saved.add(c);
+        }
+        return saved;
+    }
+
+    private List<TransactionRequest> generateBulkTransactions(List<Customer> customers, int count) {
+        List<TransactionRequest> list = new ArrayList<>();
+        Random rng = new Random(7331);
+        LocalDateTime now = LocalDateTime.now();
+
+        String[] allCountries = {
+            "India", "USA", "UAE", "Germany", "Singapore", "UK",
+            "France", "Japan", "China", "Brazil", "Canada", "Australia",
+            "Netherlands", "Switzerland", "South Africa"
+        };
+
+        // 30 payees
+        String[] payees = {
+            "PAYEE-101", "PAYEE-202", "PAYEE-303", "PAYEE-404", "PAYEE-505",
+            "PAYEE-606", "PAYEE-707", "PAYEE-808", "PAYEE-909", "PAYEE-010",
+            "PAYEE-NEW-A1", "PAYEE-NEW-B2", "PAYEE-NEW-C3", "PAYEE-NEW-D4",
+            "PAYEE-INTL-001", "PAYEE-INTL-002", "PAYEE-INTL-003",
+            "PAYEE-CORP-X", "PAYEE-CORP-Y", "PAYEE-CORP-Z",
+            "PAYEE-VENDOR-01", "PAYEE-VENDOR-02", "PAYEE-VENDOR-03",
+            "PAYEE-GOV-TAX", "PAYEE-INS-PREM", "PAYEE-LOAN-EMI",
+            "PAYEE-SALARY", "PAYEE-RENT-01", "PAYEE-MED-HOSP", "PAYEE-TRAVEL"
+        };
+
+        String[] descriptions = {
+            "Utility payment", "Vendor transfer", "Online purchase", "International wire",
+            "Card payment", "Salary disbursement", "Investment fund", "Insurance premium",
+            "Rent payment", "Medical expense", "Software subscription", "Equipment purchase",
+            "Consulting fee", "Loan repayment", "Travel reimbursement", "Maintenance charge",
+            "Tax payment", "Freight charges", "Legal retainer", "Marketing spend",
+            "Dividend transfer", "Stock purchase", "Forex conversion", "Charity donation",
+            "Mortgage payment", "Car loan EMI", "Education fee", "Healthcare bill",
+            "Grocery payment", "Fuel reimbursement"
+        };
+
+        for (int i = 0; i < count; i++) {
+            Customer cust = customers.get(rng.nextInt(customers.size()));
+
+            // 65% domestic, 35% international
+            String country = rng.nextInt(100) < 65
+                ? cust.registeredCountry()
+                : allCountries[rng.nextInt(allCountries.length)];
+
+            // Amount distribution: 55% small, 30% medium, 15% large (triggers AMOUNT rule)
+            BigDecimal amount;
+            int tier = rng.nextInt(100);
+            if (tier < 55) {
+                amount = BigDecimal.valueOf(10 + rng.nextInt(4990));       // $10–$5k
+            } else if (tier < 85) {
+                amount = BigDecimal.valueOf(5000 + rng.nextInt(5000));     // $5k–$10k
+            } else {
+                amount = BigDecimal.valueOf(10001 + rng.nextInt(89999));   // $10k–$100k
+            }
+
+            // Timestamp: 180 days window; 8% chance of unusual hours (1–4 AM)
+            int daysBack = rng.nextInt(180);
+            int hour = rng.nextInt(100) < 8 ? (1 + rng.nextInt(3)) : (6 + rng.nextInt(16));
+            int minute = rng.nextInt(60);
+            LocalDateTime ts = now.minusDays(daysBack).withHour(hour).withMinute(minute).withSecond(0);
+
+            String payee = payees[rng.nextInt(payees.length)];
+            String desc  = descriptions[rng.nextInt(descriptions.length)];
+
+            list.add(new TransactionRequest(cust.id(), amount, payee, country, ts, desc));
+        }
+        return list;
     }
 
     private String severity(int riskScore) {
