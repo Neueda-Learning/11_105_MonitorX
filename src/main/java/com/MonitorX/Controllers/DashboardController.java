@@ -1,6 +1,7 @@
 package com.MonitorX.Controllers;
 
 import com.MonitorX.Services.FraudDetectionService;
+import com.MonitorX.models.AuditLogEntry;
 import com.MonitorX.models.DashboardSummary;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,5 +32,9 @@ public class DashboardController {
     public Map<String, Integer> demo() {
         return service.seedDemo();
     }
-}
 
+    @GetMapping("/activity")
+    public List<AuditLogEntry> activity() {
+        return service.getRecentActivity();
+    }
+}
