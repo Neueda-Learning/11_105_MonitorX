@@ -31,6 +31,20 @@ public class AuthController {
                         .body(Map.of("error", "Invalid username or password")));
     }
 
+    // OAuth2 password flow endpoint — used by Swagger Authorize dialog
+    @PostMapping(value = "/token", consumes = org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<Map<String, String>> token(
+            @RequestParam("username") String username,
+            @RequestParam("password") String password) {
+        return authService.login(username, password)
+                .map(token -> ResponseEntity.ok(Map.of(
+                        "access_token", token,
+                        "token_type", "bearer"
+                )))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Invalid username or password")));
+    }
+
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
