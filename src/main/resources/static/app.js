@@ -655,28 +655,50 @@ async function openAlertDrawer(id) {
 
         state.selectedAlert = alert;
 
+        // Header
         elements.caseTitle.textContent = `Alert Case File #${alert.id}`;
+
+        // Severity colour on drawer header strip
+        const severityColors = { HIGH: 'var(--danger-color)', MEDIUM: 'var(--warning-color)', LOW: 'var(--success-color)' };
+        document.getElementById('caseDrawer').style.borderTop = `4px solid ${severityColors[alert.severity] || 'var(--border-color)'}`;
+
+        // Summary bar
         elements.caseBadgeStatus.textContent = alert.status;
         elements.caseBadgeStatus.className = `badge ${alert.status.toLowerCase()}`;
         elements.caseBadgeSeverity.textContent = alert.severity;
         elements.caseBadgeSeverity.className = `badge ${alert.severity.toLowerCase()}`;
         elements.caseScore.textContent = alert.riskScore;
         elements.caseScore.style.color = alert.riskScore >= 60 ? 'var(--danger-color)' : alert.riskScore >= 30 ? 'var(--warning-color)' : 'var(--success-color)';
-
         elements.caseCustomerName.textContent = alert.customerName;
         elements.caseTime.textContent = date.format(new Date(alert.createdAt));
 
-        // Reasons
-        elements.caseReasons.innerHTML = alert.reasons.map(r => `<div>• ${safeHTML(r)}</div>`).join("");
+        // Reasons — formal flag cards
+        elements.caseReasons.innerHTML = alert.reasons.length
+            ? alert.reasons.map(r => {
+                // Parse "Rule [Rule Name]: description" vs plain system flags
+                const ruleMatch = r.match(/^Rule \[(.+?)\]: (.+)$/);
+                if (ruleMatch) {
+                    return `<div class="flag-card flag-rule">
+                        <div class="flag-tag">Rule Violation</div>
+                        <div class="flag-title">${safeHTML(ruleMatch[1])}</div>
+                        <div class="flag-desc">${safeHTML(ruleMatch[2])}</div>
+                    </div>`;
+                } else {
+                    return `<div class="flag-card flag-system">
+                        <div class="flag-tag">System Flag</div>
+                        <div class="flag-title">${safeHTML(r)}</div>
+                    </div>`;
+                }
+            }).join('')
+            : '<div style="color:var(--text-muted);font-style:italic;font-size:0.82rem;">No triggers recorded.</div>';
 
-        // Associated Tx details
+        // Transaction
         elements.caseTxId.textContent = `#${tx.id}`;
         elements.caseTxAmount.textContent = money.format(tx.amount);
         elements.caseTxPayee.textContent = tx.payeeId;
         elements.caseTxCountry.textContent = tx.transactionCountry;
-        elements.caseTxDescription.textContent = tx.description || 'No description provided';
+        elements.caseTxDescription.textContent = tx.description || '—';
 
-        // Operator input & timeline history
         elements.operatorNotes.value = '';
         renderAlertHistory(history);
         renderOperatorWorkflowActions(alert.status);
