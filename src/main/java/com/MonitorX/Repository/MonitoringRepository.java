@@ -5,6 +5,7 @@ import com.MonitorX.models.FraudAlert;
 import com.MonitorX.models.Transaction;
 import com.MonitorX.models.Rule;
 import com.MonitorX.models.AlertHistoryItem;
+import com.MonitorX.models.AuditLogEntry;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -317,6 +318,27 @@ public class MonitoringRepository {
         );
     }
 
+    public List<AuditLogEntry> findRecentActivity(int limit) {
+        return jdbc.query(
+                "SELECT ah.id, ah.alert_id, a.transaction_id, a.customer_name, a.severity, " +
+                "ah.status, ah.operator_notes, ah.changed_at " +
+                "FROM alert_history ah " +
+                "JOIN alerts a ON ah.alert_id = a.id " +
+                "ORDER BY ah.changed_at DESC LIMIT ?",
+                (rs, rowNum) -> new AuditLogEntry(
+                        rs.getInt("id"),
+                        rs.getInt("alert_id"),
+                        rs.getInt("transaction_id"),
+                        rs.getString("customer_name"),
+                        rs.getString("severity"),
+                        rs.getString("status"),
+                        rs.getString("operator_notes"),
+                        rs.getTimestamp("changed_at").toLocalDateTime()
+                ),
+                limit
+        );
+    }
+
     // Rule Methods
     public List<Rule> findAllRules() {
         return jdbc.query("SELECT id, name, type, severity, parameters, is_active FROM rules ORDER BY id", this::mapRule);
@@ -401,9 +423,9 @@ public class MonitoringRepository {
         jdbc.update("DELETE FROM alerts");
         jdbc.update("DELETE FROM transaction_reasons");
         jdbc.update("DELETE FROM transactions");
-        // Reset sequences in H2
-        jdbc.update("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
-        jdbc.update("ALTER TABLE alerts ALTER COLUMN id RESTART WITH 1");
-        jdbc.update("ALTER TABLE alert_history ALTER COLUMN id RESTART WITH 1");
+        // Reset auto-increment counters (MySQL syntax)
+        jdbc.update("ALTER TABLE transactions AUTO_INCREMENT = 1");
+        jdbc.update("ALTER TABLE alerts AUTO_INCREMENT = 1");
+        jdbc.update("ALTER TABLE alert_history AUTO_INCREMENT = 1");
     }
 }

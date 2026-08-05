@@ -8,6 +8,7 @@ import com.MonitorX.models.Transaction;
 import com.MonitorX.models.TransactionRequest;
 import com.MonitorX.models.Rule;
 import com.MonitorX.models.AlertHistoryItem;
+import com.MonitorX.models.AuditLogEntry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -284,6 +285,10 @@ public class FraudDetectionService {
         Rule rule = getRule(id);
         Rule toggled = new Rule(rule.id(), rule.name(), rule.type(), rule.severity(), rule.parameters(), !rule.isActive());
         return repository.updateRule(toggled);
+    }
+
+    public List<AuditLogEntry> getRecentActivity() {
+        return repository.findRecentActivity(100);
     }
 
     public Map<String, Integer> seedDemo() {
