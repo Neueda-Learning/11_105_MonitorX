@@ -439,76 +439,104 @@
 
 <!-- SLIDE-OUT DRAWER: ALERT DETAILS & RESOLUTION (CASE FILE) -->
 <div class="drawer" id="caseDrawer">
+    <!-- Header: Case identity -->
     <div class="drawer-header">
         <div>
-            <span class="eyebrow text-warning">CASE DETAIL FILE</span>
+            <div class="drawer-eyebrow">FRAUD ALERT — CASE FILE</div>
             <h2 id="caseTitle">Alert Case #1</h2>
         </div>
         <button type="button" class="drawer-close-btn" id="closeCaseDrawer">&times;</button>
     </div>
-    <div class="drawer-body">
-        <!-- Alert Status Banner -->
-        <div class="case-status-banner">
-            <div>
-                <span class="badge" id="caseBadgeStatus">OPEN</span>
-                <span class="badge" id="caseBadgeSeverity">HIGH</span>
-            </div>
+
+    <!-- Case Summary Bar: one-glance overview -->
+    <div class="case-summary-bar">
+        <div class="case-summary-cell">
+            <span class="case-summary-label">STATUS</span>
+            <span class="badge" id="caseBadgeStatus">OPEN</span>
+        </div>
+        <div class="case-summary-cell">
+            <span class="case-summary-label">SEVERITY</span>
+            <span class="badge" id="caseBadgeSeverity">HIGH</span>
+        </div>
+        <div class="case-summary-cell">
+            <span class="case-summary-label">RISK SCORE</span>
             <span class="case-score" id="caseScore">70</span>
         </div>
+        <div class="case-summary-cell">
+            <span class="case-summary-label">CUSTOMER</span>
+            <strong id="caseCustomerName" style="font-size:0.85rem;">—</strong>
+        </div>
+        <div class="case-summary-cell">
+            <span class="case-summary-label">RAISED AT</span>
+            <span id="caseTime" style="font-size:0.82rem;color:var(--text-secondary);">—</span>
+        </div>
+    </div>
 
-        <!-- Section: Customer -->
+    <div class="drawer-body">
+
+        <!-- Section: Fraud Triggers -->
         <div class="case-section">
-            <h4>Customer Profile</h4>
-            <div class="details-grid-2">
-                <div><span class="label">Name:</span> <strong id="caseCustomerName">John Smith</strong></div>
-                <div><span class="label">Time:</span> <span id="caseTime">Aug 4, 2026, 6:00 PM</span></div>
+            <div class="case-section-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                Fraud Trigger Analysis
             </div>
+            <div class="case-reasons-box" id="caseReasons"></div>
         </div>
 
-        <!-- Section: Triggering Reason -->
+        <!-- Section: Transaction -->
         <div class="case-section">
-            <h4>Triggering Activity Analysis</h4>
-            <div class="case-reasons-box" id="caseReasons">
-                <!-- Injected lists of reasons -->
+            <div class="case-section-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                Transaction Details
             </div>
-        </div>
-
-        <!-- Section: Triggering Transaction -->
-        <div class="case-section">
-            <h4>Transaction Details</h4>
-            <div class="transaction-detail-box">
-                <div class="details-grid-2">
-                    <div><span class="label">Tx ID:</span> <span id="caseTxId">#12</span></div>
-                    <div><span class="label">Amount:</span> <strong id="caseTxAmount">$0.00</strong></div>
-                    <div><span class="label">Payee:</span> <span id="caseTxPayee">PAYEE-1002</span></div>
-                    <div><span class="label">Country:</span> <span id="caseTxCountry">US</span></div>
+            <div class="case-tx-card">
+                <div class="case-tx-grid">
+                    <div class="case-tx-field">
+                        <span class="case-tx-label">Transaction ID</span>
+                        <span class="case-tx-value" id="caseTxId">—</span>
+                    </div>
+                    <div class="case-tx-field">
+                        <span class="case-tx-label">Amount</span>
+                        <strong class="case-tx-amount" id="caseTxAmount">—</strong>
+                    </div>
+                    <div class="case-tx-field">
+                        <span class="case-tx-label">Payee</span>
+                        <span class="case-tx-value" id="caseTxPayee">—</span>
+                    </div>
+                    <div class="case-tx-field">
+                        <span class="case-tx-label">Country</span>
+                        <span class="case-tx-value" id="caseTxCountry">—</span>
+                    </div>
                 </div>
-                <div class="tx-description-box">
-                    <span class="label">Description:</span>
-                    <p id="caseTxDescription">Online purchase</p>
+                <div class="case-tx-desc">
+                    <span class="case-tx-label">Description</span>
+                    <p id="caseTxDescription" style="margin-top:4px;font-size:0.85rem;color:var(--text-secondary);">—</p>
                 </div>
             </div>
         </div>
 
-        <!-- Section: Audit Trail / Timeline -->
+        <!-- Section: Audit Trail -->
         <div class="case-section">
-            <h4>Audit Trail & Status History</h4>
-            <div class="timeline" id="caseHistoryTimeline">
-                <!-- JS populated items -->
+            <div class="case-section-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v10l4 4"/><circle cx="12" cy="12" r="10"/></svg>
+                Audit Trail
             </div>
+            <div class="timeline" id="caseHistoryTimeline"></div>
         </div>
 
-        <!-- Section: Actions (Only visible if active) -->
+        <!-- Section: Operator Actions -->
         <div class="case-section action-section" id="caseActionSection">
-            <h4>Operator Investigation Actions</h4>
-            <div class="form-group">
-                <label for="operatorNotes">Investigation & Resolution Notes</label>
-                <textarea id="operatorNotes" rows="3" placeholder="Enter transaction confirmation details, client contact notes, or false-positive explanations..."></textarea>
+            <div class="case-section-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Operator Actions
             </div>
-            <div class="action-buttons-wrap" id="caseActionButtons">
-                <!-- Dynamic active actions -->
+            <div class="case-action-notes">
+                <label class="case-tx-label" for="operatorNotes">Resolution / Investigation Notes</label>
+                <textarea id="operatorNotes" rows="3" placeholder="Document findings, client contact outcome, or reason for dismissal..."></textarea>
             </div>
+            <div class="action-buttons-wrap" id="caseActionButtons"></div>
         </div>
+
     </div>
 </div>
 
