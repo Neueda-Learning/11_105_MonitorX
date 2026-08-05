@@ -428,4 +428,18 @@ public class MonitoringRepository {
         jdbc.update("ALTER TABLE alerts AUTO_INCREMENT = 1");
         jdbc.update("ALTER TABLE alert_history AUTO_INCREMENT = 1");
     }
+
+    public void clearAllForDemo() {
+        // Clear dependent tables first (FK order)
+        jdbc.update("DELETE FROM alert_history");
+        jdbc.update("DELETE FROM alerts");
+        jdbc.update("DELETE FROM transaction_reasons");
+        jdbc.update("DELETE FROM transactions");
+        jdbc.update("DELETE FROM customers");
+        // Reset auto-increment counters
+        jdbc.update("ALTER TABLE transactions AUTO_INCREMENT = 1");
+        jdbc.update("ALTER TABLE alerts AUTO_INCREMENT = 1");
+        jdbc.update("ALTER TABLE alert_history AUTO_INCREMENT = 1");
+        jdbc.update("ALTER TABLE customers AUTO_INCREMENT = 1");
+    }
 }
