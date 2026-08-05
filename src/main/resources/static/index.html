@@ -3,102 +3,574 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="MonitorX fraud and transaction monitoring dashboard">
-    <title>MonitorX | Fraud Monitoring</title>
+    <meta name="description" content="MonitorX - Fraud and Transaction Real-time Monitoring & Alerting System">
+    <title>MonitorX | Real-time Risk Dash</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230D2057'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-weight='800' font-family='sans-serif' fill='white'>MX</text></svg>">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="topbar">
-    <a class="brand" href="#overview" aria-label="MonitorX home">
-        <span class="brand-mark">MX</span>
-        <span><strong>MonitorX</strong><small>Transaction intelligence</small></span>
-    </a>
-    <nav>
-        <a href="#overview">Overview</a>
-        <a href="#transactions">Transactions</a>
-        <a href="#alerts">Alerts</a>
-    </nav>
-    <label class="risk-filter-control">
-        <span>Alert risk</span>
-        <select id="riskFilter" aria-label="Filter alerts by risk rating">
-            <option value="ALL">All alerts</option>
-            <option value="LOW">Low risk</option>
-            <option value="MEDIUM">Medium risk</option>
-            <option value="HIGH">High risk</option>
-        </select>
-    </label>
-    <button class="button secondary" id="seedButton">Reset 500 transactions</button>
-</header>
-
-<main>
-    <section class="hero" id="overview">
-        <div>
-            <span class="eyebrow">LIVE RISK OVERVIEW</span>
-            <h1>See suspicious payments before they become losses.</h1>
-            <p>MonitorX checks transaction amount, time, and location, then creates a reviewable alert when a risk rule is triggered.</p>
+<div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a class="brand" href="#overview">
+            <div class="brand-logo">MX</div>
+            <div class="brand-text">
+                <span class="brand-name">MonitorX</span>
+                
+            </div>
+        </a>
+        <nav class="nav-menu">
+            <a href="#overview" class="nav-item active" data-tab="overview">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                <span>Overview</span>
+            </a>
+            <a href="#transactions" class="nav-item" data-tab="transactions">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 15h16v-2H4v2zm0 4h16v-2H4v2zm0-8h16V9H4v2zm0-6v2h16V5H4z"/></svg>
+                <span>Transactions</span>
+            </a>
+            <a href="#alerts" class="nav-item" data-tab="alerts">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>Alerts Queue</span>
+                <span class="alert-count-badge" id="sidebarAlertBadge" style="display:none;">0</span>
+            </a>
+            <a href="#rules" class="nav-item" data-tab="rules">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                <span>Rules Engine</span>
+            </a>
+            <a href="#customers" class="nav-item" data-tab="customers">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span>Customers</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="button secondary full-width" id="seedButton">
+                <svg viewBox="0 0 24 24"><path d="M12 6v6h6v2h-6v6h-2v-6H4v-2h6V6h2z"/></svg>
+                Load Demo Data
+            </button>
+            <button class="button danger-btn full-width" id="btnLogout" style="margin-top: 10px;">
+                Logout
+            </button>
         </div>
-        <div class="system-status"><span></span> Monitoring active</div>
-    </section>
+    </aside>
 
-    <section class="metrics" aria-label="Dashboard summary">
-        <article><span>Total transactions</span><strong id="totalTransactions">0</strong></article>
-        <article><span>Flagged transactions</span><strong id="flaggedTransactions">0</strong></article>
-        <article><span>Open alerts</span><strong id="openAlerts">0</strong></article>
-        <article><span>Processed volume</span><strong id="totalVolume">$0.00</strong></article>
-    </section>
-
-    <section class="workspace">
-        <article class="panel transaction-panel" id="transactions">
-            <div class="panel-heading">
-                <div><span class="eyebrow">TRANSACTION FEED</span><h2>Recent activity</h2></div>
-                <button class="button" id="newTransactionButton">+ Add transaction</button>
+    <!-- Main Workspace -->
+    <main class="content-area">
+        <!-- HEADER -->
+        <header class="workspace-header">
+            <div class="header-title">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <p id="pageDescription">Real-time indicators & transaction monitoring summary</p>
             </div>
-            <div class="table-wrap transaction-table-wrap">
-                <table>
-                    <thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Country</th><th>Time</th><th>Risk</th><th>Status</th></tr></thead>
-                    <tbody id="transactionRows"></tbody>
-                </table>
-                <div class="empty" id="transactionEmpty">No transactions yet.</div>
-            </div>
-        </article>
+            
+        </header>
 
-        <article class="panel alerts-panel" id="alerts">
-            <div class="panel-heading">
-                <div><span class="eyebrow">CASE QUEUE</span><h2>Fraud alerts</h2></div>
+        <!-- TAB CONTENT: OVERVIEW -->
+        <div id="tab-overview" class="tab-pane active">
+            <!-- Metrics grid -->
+            <div class="metrics-grid">
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <span class="metric-label">Processed Volume</span>
+                        <h2 class="metric-value" id="metricVolume">$0.00</h2>
+                    </div>
+                    <div class="metric-icon volume">💰</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <span class="metric-label">Total Transactions</span>
+                        <h2 class="metric-value" id="metricTotal">0</h2>
+                    </div>
+                    <div class="metric-icon total">💳</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <span class="metric-label">Flagged Cases</span>
+                        <h2 class="metric-value text-warning" id="metricFlagged">0</h2>
+                    </div>
+                    <div class="metric-icon flagged">⚠️</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <span class="metric-label">Active Alerts</span>
+                        <h2 class="metric-value text-danger" id="metricActiveAlerts">0</h2>
+                    </div>
+                    <div class="metric-icon active-alerts">🚨</div>
+                </div>
             </div>
-            <div class="alert-list" id="alertList"></div>
-            <div class="empty" id="alertEmpty">No fraud alerts. Everything looks clear.</div>
-        </article>
-    </section>
 
-    <section class="panel rules">
-        <div class="panel-heading"><div><span class="eyebrow">ACTIVE RULES</span><h2>Risk checks</h2></div></div>
-        <div class="rule-grid">
-            <article><span class="rule-icon">$</span><div><strong>High amount</strong><p>Adds 40 points above 10,000.</p></div></article>
-            <article><span class="rule-icon">T</span><div><strong>Unusual hours</strong><p>Adds 20 points before 5 AM.</p></div></article>
-            <article><span class="rule-icon">L</span><div><strong>Location mismatch</strong><p>Adds 30 points outside the registered country.</p></div></article>
-            <article><span class="rule-icon">V</span><div><strong>Transaction velocity</strong><p>Adds 30 points when more than 5 transactions occur within 10 minutes.</p></div></article>
+            <!-- Visualization row -->
+            <div class="dashboard-row">
+                <div class="card graph-card flex-2">
+                    <div class="card-header">
+                        <h3>Volume Trend & Velocity Analytics</h3>
+                        <span class="badge badge-info">Hourly aggregation</span>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
+                </div>
+                <div class="card alert-summary-card flex-1">
+                    <div class="card-header">
+                        <h3>Alert Status Stats</h3>
+                    </div>
+                    <div class="alert-donut-wrap">
+                        <div class="donut-chart" id="alertDistributionDonut"></div>
+                        <ul class="donut-legend" id="alertDistributionLegend"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Critical Cases -->
+            <div class="card table-card">
+                <div class="card-header">
+                    <h3>Recent Active Alerts</h3>
+                    <a href="#alerts" class="link-action">View all alert cases ➔</a>
+                </div>
+                <div class="quick-alerts-container" id="quickAlertList"></div>
+            </div>
+            <!-- System Activity / Audit Log -->
+            <div class="card table-card">
+                <div class="card-header">
+                    <h3>System Activity Log</h3>
+                    <span class="metric-label" style="font-size:0.78rem;">All alert status changes &amp; operator actions</span>
+                </div>
+                <div class="table-wrap">
+                    <table id="activityLogTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Timestamp</th>
+                                <th>Customer</th>
+                                <th>Alert ID</th>
+                                <th>Tx ID</th>
+                                <th>Severity</th>
+                                <th>Action Taken</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityLogRows"></tbody>
+                    </table>
+                    <div class="empty" id="activityLogEmpty" style="display:none;">No activity recorded yet.</div>
+                </div>
+            </div>        </div>
+
+        <!-- TAB CONTENT: TRANSACTIONS -->
+        <div id="tab-transactions" class="tab-pane">
+            <div class="card filter-card">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="searchDesc">Search</label>
+                        <input type="text" id="searchDesc" placeholder="Tx ID or description...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterCustomer">Customer</label>
+                        <select id="filterCustomer">
+                            <option value="">All Customers</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterAmountMin">Min Amount ($)</label>
+                        <input type="number" id="filterAmountMin" placeholder="e.g. 100">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterAmountMax">Max Amount ($)</label>
+                        <input type="number" id="filterAmountMax" placeholder="e.g. 20000">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterStatus">Risk Status</label>
+                        <select id="filterStatus">
+                            <option value="">All Statuses</option>
+                            <option value="SUCCESS">Approved (SUCCESS)</option>
+                            <option value="FLAGGED">Flagged (FLAGGED)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group actions-group">
+                        <button class="button" id="btnApplyFilters">Apply Filters</button>
+                        <button class="button secondary" id="btnResetFilters">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card table-card">
+                <div class="card-header">
+                    <h3>Transaction Activity Feed</h3>
+                    <button class="button" id="newTransactionButton">+ Record Transaction</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer Account</th>
+                                <th>Payee / Counterparty</th>
+                                <th>Amount</th>
+                                <th>Risk Score</th>
+                                <th>Country</th>
+                                <th>Timestamp</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionRows">
+                            <!-- JS injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="empty" id="transactionEmpty" style="display: none;">
+                    No transactions match your search filter settings.
+                </div>
+            </div>
         </div>
-    </section>
-</main>
 
-<dialog id="transactionDialog">
+        <!-- TAB CONTENT: ALERTS -->
+        <div id="tab-alerts" class="tab-pane">
+            <div class="alerts-tabs-header">
+                <button class="alerts-tab-btn active" data-alert-filter="ALL">All Alerts</button>
+                <button class="alerts-tab-btn" data-alert-filter="OPEN">Open (<span id="countOpen">0</span>)</button>
+                <button class="alerts-tab-btn" data-alert-filter="ACKNOWLEDGED">Acknowledged (<span id="countAck">0</span>)</button>
+                <button class="alerts-tab-btn" data-alert-filter="INVESTIGATING">Investigating (<span id="countInv">0</span>)</button>
+                <button class="alerts-tab-btn" data-alert-filter="CLOSED">Closed/Dismissed</button>
+            </div>
+
+            <div class="alert-grid-layout" id="alertsGrid">
+                <!-- JS populated alert cards -->
+            </div>
+            <div class="empty" id="alertEmpty" style="display: none;">
+                No alerts in this category. Everything is clear.
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: RULES -->
+        <div id="tab-rules" class="tab-pane">
+            <div class="card table-card">
+                <div class="card-header">
+                    <h3>Configurable Monitoring Rules</h3>
+                    <button class="button" id="btnNewRule">+ Add Custom Rule</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Rule Name</th>
+                                <th>Rule Type</th>
+                                <th>Severity</th>
+                                <th>Parameters Configuration</th>
+                                <th>Active Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ruleRows">
+                            <!-- JS Injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: CUSTOMERS -->
+        <div id="tab-customers" class="tab-pane">
+            <div class="card table-card">
+                <div class="card-header">
+                    <h3>Customer Registry</h3>
+                    <button class="button" id="btnNewCustomer">+ Add Customer</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Account Number</th>
+                                <th>Registered Country</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerRows">
+                            <!-- JS Injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="empty" id="customerEmpty" style="display: none;">
+                    No customer records registered yet.
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- DIALOG: RECORD TRANSACTION -->
+<dialog id="transactionDialog" class="modal-dialog">
     <form id="transactionForm">
-        <div class="dialog-heading"><div><span class="eyebrow">NEW PAYMENT</span><h2>Record transaction</h2></div><button type="button" class="icon-button" id="closeDialog" aria-label="Close">X</button></div>
-        <label>Customer<select id="customerId" required></select></label>
-        <div class="form-row">
-            <label>Amount<input id="amount" type="number" min="0.01" step="0.01" placeholder="12500.00" required></label>
-            <label>Country<input id="country" maxlength="60" placeholder="India" required></label>
+        <div class="dialog-heading">
+            <div>
+                <span class="eyebrow text-info">NEW INCOMING TRANSACTION</span>
+                <h2>Process Transaction</h2>
+            </div>
+            <button type="button" class="close-modal-btn" id="closeDialog">&times;</button>
         </div>
-        <label>Date and time<input id="timestamp" type="datetime-local"></label>
-        <label>Description<input id="description" maxlength="160" placeholder="Vendor transfer"></label>
-        <p class="form-error" id="formError" role="alert"></p>
-        <div class="dialog-actions"><button type="button" class="button secondary" id="cancelDialog">Cancel</button><button class="button" type="submit">Check transaction</button></div>
+        <div class="dialog-body">
+            <div class="form-group">
+                <label for="customerId">Customer Profile</label>
+                <select id="customerId" required></select>
+            </div>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="amount">Transaction Amount ($)</label>
+                    <input id="amount" type="number" min="0.01" step="0.01" placeholder="e.g. 1500.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="payeeId">Payee / Account Identifier</label>
+                    <input id="payeeId" type="text" placeholder="e.g. PAYEE-88921" required>
+                </div>
+            </div>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="country">Country Code</label>
+                    <input id="country" maxlength="60" placeholder="e.g. India" required>
+                </div>
+                <div class="form-group">
+                    <label for="timestamp">Transaction Time</label>
+                    <input id="timestamp" type="datetime-local">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description">Transaction Description</label>
+                <input id="description" maxlength="160" placeholder="e.g. Vendor services payment">
+            </div>
+            <p class="form-error" id="formError" role="alert"></p>
+        </div>
+        <div class="dialog-actions">
+            <button type="button" class="button secondary" id="cancelDialog">Cancel</button>
+            <button class="button" type="submit">Verify & Process</button>
+        </div>
     </form>
 </dialog>
 
+<!-- DIALOG: ADD/EDIT RULE -->
+<dialog id="ruleDialog" class="modal-dialog">
+    <form id="ruleForm">
+        <input type="hidden" id="ruleId">
+        <div class="dialog-heading">
+            <div>
+                <span class="eyebrow text-info" id="ruleModalEyebrow">MONITORING ENGINE</span>
+                <h2 id="ruleModalTitle">Add Monitoring Rule</h2>
+            </div>
+            <button type="button" class="close-modal-btn" id="closeRuleDialog">&times;</button>
+        </div>
+        <div class="dialog-body">
+            <div class="form-group">
+                <label for="ruleName">Rule Name</label>
+                <input id="ruleName" type="text" placeholder="e.g. Large Offshore Transfer" required>
+            </div>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="ruleType">Rule Type</label>
+                    <select id="ruleType" required>
+                        <option value="AMOUNT_THRESHOLD">Amount Threshold Rule</option>
+                        <option value="VELOCITY">Velocity Frequency Rule</option>
+                        <option value="NEW_PAYEE">New Payee Alert Rule</option>
+                        <option value="DAILY_LIMIT">Daily Accumulation Limit</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ruleSeverity">Alert Severity</label>
+                    <select id="ruleSeverity" required>
+                        <option value="LOW">LOW</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- DYNAMIC RULE PARAMETERS CONTROLS -->
+            <div class="card params-card">
+                <span class="eyebrow text-info">Rule Parameters Configuration</span>
+                
+                <div class="rule-param-fields" id="param-AMOUNT_THRESHOLD">
+                    <div class="form-group">
+                        <label for="paramThreshold">Single Transaction Limit Amount ($)</label>
+                        <input id="paramThreshold" type="number" step="0.01" value="10000.00" placeholder="10000.00">
+                    </div>
+                </div>
+
+                <div class="rule-param-fields" id="param-VELOCITY" style="display:none;">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="paramVelocityMins">Time Window (Minutes)</label>
+                            <input id="paramVelocityMins" type="number" value="10" placeholder="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="paramVelocityMaxCount">Max Allowed Transactions</label>
+                            <input id="paramVelocityMaxCount" type="number" value="5" placeholder="5">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rule-param-fields" id="param-NEW_PAYEE" style="display:none;">
+                    <p class="param-tip">This rule does not require parameters. It triggers alerts on the first transaction a customer makes to any new payee counterparty.</p>
+                </div>
+
+                <div class="rule-param-fields" id="param-DAILY_LIMIT" style="display:none;">
+                    <div class="form-group">
+                        <label for="paramDailyLimit">Daily Cumulative Transfer Limit ($)</label>
+                        <input id="paramDailyLimit" type="number" step="0.01" value="50000.00" placeholder="50000.00">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group row-checkbox">
+                <input type="checkbox" id="ruleActive" checked>
+                <label for="ruleActive">Active Status (Evaluate incoming transactions against this rule)</label>
+            </div>
+            
+            <p class="form-error" id="ruleFormError" role="alert"></p>
+        </div>
+        <div class="dialog-actions">
+            <button type="button" class="button secondary" id="cancelRuleDialog">Cancel</button>
+            <button class="button" type="submit" id="btnSaveRule">Save Rule</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- SLIDE-OUT DRAWER: ALERT DETAILS & RESOLUTION (CASE FILE) -->
+<div class="drawer" id="caseDrawer">
+    <div class="drawer-header">
+        <div>
+            <span class="eyebrow text-warning">CASE DETAIL FILE</span>
+            <h2 id="caseTitle">Alert Case #1</h2>
+        </div>
+        <button type="button" class="drawer-close-btn" id="closeCaseDrawer">&times;</button>
+    </div>
+    <div class="drawer-body">
+        <!-- Alert Status Banner -->
+        <div class="case-status-banner">
+            <div>
+                <span class="badge" id="caseBadgeStatus">OPEN</span>
+                <span class="badge" id="caseBadgeSeverity">HIGH</span>
+            </div>
+            <span class="case-score" id="caseScore">70</span>
+        </div>
+
+        <!-- Section: Customer -->
+        <div class="case-section">
+            <h4>Customer Profile</h4>
+            <div class="details-grid-2">
+                <div><span class="label">Name:</span> <strong id="caseCustomerName">John Smith</strong></div>
+                <div><span class="label">Time:</span> <span id="caseTime">Aug 4, 2026, 6:00 PM</span></div>
+            </div>
+        </div>
+
+        <!-- Section: Triggering Reason -->
+        <div class="case-section">
+            <h4>Triggering Activity Analysis</h4>
+            <div class="case-reasons-box" id="caseReasons">
+                <!-- Injected lists of reasons -->
+            </div>
+        </div>
+
+        <!-- Section: Triggering Transaction -->
+        <div class="case-section">
+            <h4>Transaction Details</h4>
+            <div class="transaction-detail-box">
+                <div class="details-grid-2">
+                    <div><span class="label">Tx ID:</span> <span id="caseTxId">#12</span></div>
+                    <div><span class="label">Amount:</span> <strong id="caseTxAmount">$0.00</strong></div>
+                    <div><span class="label">Payee:</span> <span id="caseTxPayee">PAYEE-1002</span></div>
+                    <div><span class="label">Country:</span> <span id="caseTxCountry">US</span></div>
+                </div>
+                <div class="tx-description-box">
+                    <span class="label">Description:</span>
+                    <p id="caseTxDescription">Online purchase</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Audit Trail / Timeline -->
+        <div class="case-section">
+            <h4>Audit Trail & Status History</h4>
+            <div class="timeline" id="caseHistoryTimeline">
+                <!-- JS populated items -->
+            </div>
+        </div>
+
+        <!-- Section: Actions (Only visible if active) -->
+        <div class="case-section action-section" id="caseActionSection">
+            <h4>Operator Investigation Actions</h4>
+            <div class="form-group">
+                <label for="operatorNotes">Investigation & Resolution Notes</label>
+                <textarea id="operatorNotes" rows="3" placeholder="Enter transaction confirmation details, client contact notes, or false-positive explanations..."></textarea>
+            </div>
+            <div class="action-buttons-wrap" id="caseActionButtons">
+                <!-- Dynamic active actions -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast" role="status"></div>
+
+<!-- DIALOG: ADD/EDIT CUSTOMER -->
+<dialog id="customerDialog" class="modal-dialog">
+    <form id="customerForm">
+        <div class="dialog-heading">
+            <div>
+                <span class="eyebrow text-info">CUSTOMER PROFILE</span>
+                <h3 id="customerModalTitle">Add New Customer</h3>
+            </div>
+            <button type="button" class="close-modal-btn" id="closeCustomerDialog">&times;</button>
+        </div>
+        <div class="dialog-body">
+            <p class="form-error" id="customerFormError" role="alert"></p>
+            <input type="hidden" id="customerFormId">
+            
+            <div class="form-group">
+                <label for="customerFormName">Full Name</label>
+                <input id="customerFormName" type="text" placeholder="e.g. Jane Doe" required>
+            </div>
+            <div class="form-group">
+                <label for="customerFormAccount">Account Number</label>
+                <input id="customerFormAccount" type="text" placeholder="e.g. ACC2001" required>
+            </div>
+            <div class="form-group">
+                <label for="customerFormCountry">Registered Country</label>
+                <input id="customerFormCountry" type="text" placeholder="e.g. USA" required>
+            </div>
+        </div>
+        <div class="dialog-actions">
+            <button type="button" class="button secondary" id="cancelCustomerDialog">Cancel</button>
+            <button class="button" type="submit" id="btnSaveCustomer">Save Customer</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- LOGIN OVERLAY PANEL -->
+<div id="loginOverlay" class="login-overlay" style="display: none;">
+    <div class="login-card">
+        <div class="login-brand">
+            <div class="logo">MX</div>
+            <h2>MonitorX</h2>
+            <p>Argus Transaction Monitor & Risk Portal</p>
+        </div>
+        <form id="loginForm">
+            <p class="form-error" id="loginError" role="alert"></p>
+            <div class="form-group">
+                <label for="loginUsername">Operator Username</label>
+                <input id="loginUsername" type="text" placeholder="Enter username" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input id="loginPassword" type="password" placeholder="Enter password" required>
+            </div>
+            <button class="button full-width" type="submit" style="margin-top: 15px;">Access System</button>
+        </form>
+    </div>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>
-g
