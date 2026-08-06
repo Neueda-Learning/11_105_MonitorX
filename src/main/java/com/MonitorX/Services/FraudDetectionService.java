@@ -28,6 +28,52 @@ public class FraudDetectionService {
     private final MonitoringRepository repository;
     private final ObjectMapper objectMapper;
 
+    // Approximate static exchange rates to USD (updated periodically as needed)
+    private static final Map<String, BigDecimal> CURRENCY_TO_USD = Map.ofEntries(
+        Map.entry("USD", BigDecimal.valueOf(1.0)),
+        Map.entry("INR", BigDecimal.valueOf(0.012)),
+        Map.entry("GBP", BigDecimal.valueOf(1.27)),
+        Map.entry("EUR", BigDecimal.valueOf(1.08)),
+        Map.entry("AED", BigDecimal.valueOf(0.272)),
+        Map.entry("JPY", BigDecimal.valueOf(0.0067)),
+        Map.entry("SGD", BigDecimal.valueOf(0.74)),
+        Map.entry("CNY", BigDecimal.valueOf(0.138)),
+        Map.entry("BRL", BigDecimal.valueOf(0.20)),
+        Map.entry("CAD", BigDecimal.valueOf(0.73)),
+        Map.entry("AUD", BigDecimal.valueOf(0.65)),
+        Map.entry("CHF", BigDecimal.valueOf(1.12)),
+        Map.entry("ZAR", BigDecimal.valueOf(0.054))
+    );
+
+    private static final Map<String, String> COUNTRY_TO_CURRENCY = Map.ofEntries(
+        Map.entry("india", "INR"),
+        Map.entry("usa", "USD"),
+        Map.entry("united states", "USD"),
+        Map.entry("uk", "GBP"),
+        Map.entry("united kingdom", "GBP"),
+        Map.entry("england", "GBP"),
+        Map.entry("germany", "EUR"),
+        Map.entry("france", "EUR"),
+        Map.entry("netherlands", "EUR"),
+        Map.entry("uae", "AED"),
+        Map.entry("united arab emirates", "AED"),
+        Map.entry("japan", "JPY"),
+        Map.entry("singapore", "SGD"),
+        Map.entry("china", "CNY"),
+        Map.entry("brazil", "BRL"),
+        Map.entry("canada", "CAD"),
+        Map.entry("australia", "AUD"),
+        Map.entry("switzerland", "CHF"),
+        Map.entry("south africa", "ZAR")
+    );
+
+    private BigDecimal toUSD(BigDecimal amount, String country) {
+        if (country == null) return amount;
+        String currency = COUNTRY_TO_CURRENCY.getOrDefault(country.toLowerCase(Locale.ROOT), "USD");
+        BigDecimal rate = CURRENCY_TO_USD.getOrDefault(currency, BigDecimal.ONE);
+        return amount.multiply(rate);
+    }
+
     public FraudDetectionService(MonitoringRepository repository, ObjectMapper objectMapper) {
         this.repository = repository;
         this.objectMapper = objectMapper;
@@ -248,7 +294,7 @@ public class FraudDetectionService {
     public DashboardSummary getSummary() {
         List<Transaction> transactions = getTransactions();
         BigDecimal volume = transactions.stream()
-                .map(Transaction::amount)
+                .map(t -> toUSD(t.amount(), t.transactionCountry()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         long flagged = transactions.stream().filter(item -> item.status().equals("FLAGGED")).count();
         long open = getAlerts().stream()

@@ -7,7 +7,7 @@ function renderSummary(summary) {
     elements.metricTotal.textContent        = summary.totalTransactions;
     elements.metricFlagged.textContent      = summary.flaggedTransactions;
     elements.metricActiveAlerts.textContent = summary.openAlerts;
-    elements.metricVolume.textContent       = money.format(summary.totalVolume);
+    elements.metricVolume.textContent       = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(summary.totalVolume);
 
     const activeCount = state.alerts.filter(
         a => ['OPEN', 'ACKNOWLEDGED', 'INVESTIGATING'].includes(a.status)
