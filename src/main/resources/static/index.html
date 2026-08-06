@@ -48,10 +48,10 @@
         </nav>
         <div class="sidebar-footer">
             <button class="button secondary full-width" id="seedButton">
-                <svg viewBox="0 0 24 24"><path d="M12 6v6h6v2h-6v6h-2v-6H4v-2h6V6h2z"/></svg>
-                Load Demo Data
+                <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+                Load 1000 Transactions
             </button>
-            <button class="button danger-btn full-width" id="btnLogout" style="margin-top: 10px;">
+            <button class="button danger-btn full-width" id="btnLogout" style="margin-top:8px;">
                 Logout
             </button>
         </div>
@@ -113,13 +113,13 @@
                         <canvas id="overviewChart"></canvas>
                     </div>
                 </div>
-                <div class="card alert-summary-card flex-1">
+                <div class="card alert-summary-card flex-1" style="display:flex;flex-direction:column;">
                     <div class="card-header">
                         <h3>Alert Status Stats</h3>
                     </div>
                     <div class="alert-donut-wrap">
-                        <div class="donut-chart" id="alertDistributionDonut"></div>
-                        <ul class="donut-legend" id="alertDistributionLegend"></ul>
+                        <div id="alertDistributionDonut"></div>
+                        <ul id="alertDistributionLegend"></ul>
                     </div>
                 </div>
             </div>
@@ -248,8 +248,7 @@
         <div id="tab-rules" class="tab-pane">
             <div class="card table-card">
                 <div class="card-header">
-                    <h3>Configurable Monitoring Rules</h3>
-                    <button class="button" id="btnNewRule">+ Add Custom Rule</button>
+                    <h3>Monitoring Rules</h3>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -260,8 +259,6 @@
                                 <th>Rule Type</th>
                                 <th>Severity</th>
                                 <th>Parameters Configuration</th>
-                                <th>Active Status</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="ruleRows">
@@ -599,6 +596,17 @@
     </div>
 </div>
 
+<!-- Module load order matters: state/utils first, then features, sync last -->
+<script src="js/app-state.js"></script>
+<script src="js/app-utils.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/app-dashboard.js"></script>
+<script src="js/app-transactions.js"></script>
+<script src="js/app-alerts.js"></script>
+<script src="js/app-rules.js"></script>
+<script src="js/app-customers.js"></script>
+<script src="js/app-auth.js"></script>
+<script src="js/app-sync.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
