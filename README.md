@@ -12,7 +12,7 @@ REST API and browser dashboard follow the simplified Argus approach.
 - Risk scores and low, medium, or high alerts
 - Alert review, resolution, and dismissal flow
 - Responsive vanilla HTML, CSS, and JavaScript dashboard
-- In-memory storage, so no database setup is needed
+- MySQL-backed persistence for customers, rules, transactions, and alerts
 
 ## Quick start with the included JAR
 
@@ -37,7 +37,13 @@ mvn clean package
 java -jar target/monitorx-1.0.0.jar
 ```
 
-## Run with Docker
+## Run with Docker (3 containers)
+
+This project runs as three containers:
+
+- `frontend`: Nginx serving the web UI and proxying API calls
+- `backend`: Spring Boot API application
+- `db`: MySQL 8.4 database
 
 Install Docker Desktop or Docker Engine with Compose, then run:
 
@@ -45,14 +51,25 @@ Install Docker Desktop or Docker Engine with Compose, then run:
 docker compose up --build
 ```
 
-Open <http://localhost:8080>. Stop with `Ctrl+C`, followed by:
+Open <http://localhost:8080> for the UI.
+
+Swagger UI is available through the frontend proxy at:
+
+<http://localhost:8080/swagger-ui/index.html>
+
+Stop containers:
 
 ```bash
 docker compose down
 ```
 
-Activity resets whenever the application restarts because this simplified
-edition intentionally uses memory storage.
+Stop and remove containers, network, and database volume:
+
+```bash
+docker compose down -v
+```
+
+MySQL data persists across restarts via the named volume `monitorx_db_data`.
 
 ## Project layout
 
@@ -68,8 +85,20 @@ src/main/resources/
 |-- static/
 |   |-- index.html
 |   |-- styles.css
-|   `-- app.js
-`-- application.properties
+|   |-- app.js
+|   `-- js/
+|-- application.properties
+|-- application-mysql.properties
+|-- schema.sql
+`-- data.sql
+
+docker/
+`-- frontend/
+	|-- Dockerfile
+	`-- nginx.conf
+
+Dockerfile.backend
+docker-compose.yml
 ```
 
 ## API
