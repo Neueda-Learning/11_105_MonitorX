@@ -75,23 +75,7 @@ function renderTransactionsFeed() {
 }
 
 async function viewTransactionDetails(id) {
-    try {
-        const tx = await request(`/api/transactions/${id}`);
-        let details = `Transaction #${tx.id} Details:\n`
-            + `Customer: ${tx.customerName} (ID: ${tx.customerId})\n`
-            + `Amount: ${formatMoney(tx.amount, tx.transactionCountry)}\n`
-            + `Payee ID: ${tx.payeeId}\n`
-            + `Country: ${tx.transactionCountry}\n`
-            + `Time: ${date.format(new Date(tx.timestamp))}\n`
-            + `Status: ${tx.status}\n`
-            + `Risk Score: ${tx.riskScore}\n`;
-        if (tx.reasons.length > 0) {
-            details += 'Reasons:\n' + tx.reasons.map(r => ` - ${r}`).join('\n');
-        }
-        alert(details);
-    } catch (err) {
-        toast(err.message, 'error');
-    }
+    // details are visible inline in the table; no popup needed
 }
 window.viewTransactionDetails = viewTransactionDetails;
 
